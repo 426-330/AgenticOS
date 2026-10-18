@@ -1,0 +1,20 @@
+dsl: "1.0"
+page:
+  id: staff
+  title: 员工与角色
+  name: staff
+  description: 员工与角色模块(建设中)
+
+body:
+  type: Page
+  children:
+    - type: Breadcrumb
+      props:
+        items:
+          - label: 员工与角色
+    - type: Card
+      children:
+        - type: Empty
+          props:
+            title: 模块建设中
+            description: 员工与角色模块尚未接入,敬请期待

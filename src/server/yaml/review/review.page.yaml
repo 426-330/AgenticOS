@@ -1,0 +1,266 @@
+dsl: "1.0"
+page:
+  id: review
+  title: 审核与授权
+  name: review
+  description: 审核与授权：统一呈现企业认证（KYB）、银行账户验证与订单结算的真实审核队列
+state:
+  keyword: ""
+  kybTab: material
+  materialKeyword: ""
+dataSources:
+  review:
+    type: http
+    autoLoad: true
+    request:
+      method: GET
+      url: /api/d/review
+      params:
+        keyword: ${state.keyword}
+  materialReviews:
+    type: http
+    autoLoad: true
+    request:
+      method: GET
+      url: /api/d/review/material
+      params:
+        keyword: ${state.materialKeyword}
+
+body:
+  type: Page
+  children:
+    - type: Flex
+      props:
+        align: baseline
+        gap: middle
+      children:
+        - type: Typography
+          props:
+            variant: h3
+            text: 审核与授权
+        - type: Typography
+          props:
+            variant: muted
+            text: 统一呈现企业认证（KYB）、银行账户验证与订单结算的真实审核队列
+    - type: Card
+      children:
+        - type: Tabs
+          props:
+            variant: line
+            items:
+              - key: overview
+                label: 总览
+                className: p-4
+                children:
+                  - type: Flex
+                    props:
+                      align: center
+                      gap: middle
+                    children:
+                      - type: Flex
+                        props:
+                          align: center
+                          gap: small
+                          className: h-9 rounded-md border bg-background px-3
+                          style:
+                            flex: 1
+                        children:
+                          - type: Icon
+                            props:
+                              name: search
+                              className: text-muted-foreground
+                          - type: Input
+                            props:
+                              value: ${state.keyword}
+                              placeholder: 搜索事项或来源
+                              # Input 的 className 挂外层包裹节点，原生 input 需经
+                              # controlClassName 去除 shadcn 基线的边框/背景
+                              controlClassName: border-0 bg-transparent px-0 shadow-none focus-visible:ring-0
+                              style:
+                                flex: 1
+                            events:
+                              onChange:
+                                - action: setState
+                                  params:
+                                    keyword: ${event}
+                                - action: reload
+                                  params:
+                                    dataSource: review
+                      - type: Button
+                        props:
+                          text: ↻ 刷新
+                          size: small
+                        events:
+                          onClick:
+                            - action: reload
+                              params:
+                                dataSource: review
+                  - type: Table
+                    props:
+                      dataSource: ${data.review.items}
+                      rowKey: id
+                      pagination: false
+                      emptyText: 暂无审核事项
+                      className: mt-4
+                      columns:
+                        - title: 事项
+                          cell:
+                            type: Text
+                            props:
+                              text: ${row.subject}
+                        - title: 来源
+                          cell:
+                            type: Text
+                            props:
+                              text: ${row.source}
+                        - title: 状态
+                          cell:
+                            type: Text
+                            props:
+                              text: ${row.status}
+                        - title: 更新时间
+                          cell:
+                            type: Text
+                            props:
+                              text: ${row.updatedAt}
+              - key: kyb
+                label: 企业与材料
+                className: p-4
+                children:
+                  - type: FloatingButtonGroup
+                    props:
+                      value: ${state.kybTab}
+                      options:
+                        - { value: material, label: 资料变更 }
+                        - { value: cert, label: 企业认证 }
+                        - { value: relation, label: 企业关联 }
+                    events:
+                      onSelect:
+                        - action: setState
+                          params:
+                            kybTab: ${event}
+                  - type: Card
+                    when: "${state.kybTab == 'material'}"
+                    props:
+                      title: 企业资料变更审核
+                      className: mt-4
+                      style:
+                        boxShadow: none
+                      extra:
+                        - type: ActionButton
+                          props:
+                            icon: refresh
+                            tooltip: 刷新
+                            ariaLabel: 刷新
+                            variant: text
+                    children:
+                      - type: Typography
+                        props:
+                          variant: muted
+                          text: 审核业务信息与企业联系人变更；通过后才写入企业主档
+                          # 卡片标题区与内容区有固定间距（extra 按钮再加高），
+                          # 负边距拉近到 small 档（约 8px）
+                          style:
+                            marginTop: -30
+                      - type: Separator
+                      - type: Flex
+                        props:
+                          align: stretch
+                          gap: middle
+                        children:
+                          - type: Flex
+                            props:
+                              direction: vertical
+                              align: stretch
+                              gap: small
+                              style:
+                                flex: 4
+                            children:
+                              - type: Flex
+                                props:
+                                  align: center
+                                  gap: small
+                                  className: h-9 rounded-md border bg-background px-3
+                                children:
+                                  - type: Icon
+                                    props:
+                                      name: search
+                                      className: text-muted-foreground
+                                  - type: Input
+                                    props:
+                                      value: ${state.materialKeyword}
+                                      placeholder: 搜索待审企业
+                                      # Input 的 className 挂外层包裹节点，原生 input 需经
+                                      # controlClassName 去除 shadcn 基线的边框/背景
+                                      controlClassName: border-0 bg-transparent px-0 shadow-none focus-visible:ring-0
+                                      style:
+                                        flex: 1
+                                    events:
+                                      onChange:
+                                        - action: setState
+                                          params:
+                                            materialKeyword: ${event}
+                                        - action: reload
+                                          params:
+                                            dataSource: materialReviews
+                              - type: Separator
+                              - type: Table
+                                props:
+                                  dataSource: ${data.materialReviews.items}
+                                  rowKey: id
+                                  pagination: false
+                                  emptyText: 暂无审核记录
+                          - type: Flex
+                            props:
+                              direction: vertical
+                              gap: small
+                              style:
+                                flex: 6
+                                # 左右分割线：框架 Separator 的竖向高度工具类
+                                # （data-[orientation=vertical]:h-full）在聚合
+                                # 样式中缺失导致 0 高不可见，改用右列左边框
+                                borderLeft: 1px solid var(--border)
+                                paddingLeft: 16
+                            children:
+                              - type: Typography
+                                props:
+                                  variant: muted
+                                  text: 右侧内容区：审核详情与操作将在此展示（待接入）
+                  - type: Card
+                    when: "${state.kybTab == 'cert'}"
+                    props:
+                      className: mt-4
+                      style:
+                        boxShadow: none
+                    children:
+                      - type: Empty
+                        props:
+                          title: 模块建设中
+                          description: 企业认证审核列表尚未接入,敬请期待
+                  - type: Card
+                    when: "${state.kybTab == 'relation'}"
+                    props:
+                      className: mt-4
+                      style:
+                        boxShadow: none
+                    children:
+                      - type: Empty
+                        props:
+                          title: 模块建设中
+                          description: 企业关联审核列表尚未接入,敬请期待
+              - key: bank
+                label: 银行账户确认
+                className: p-4
+                children:
+                  - type: Empty
+                    props:
+                      title: 模块建设中
+                      description: 银行账户确认列表尚未接入,敬请期待
+              - key: order
+                label: 订单与结算
+                className: p-4
+                children:
+                  - type: Empty
+                    props:
+                      title: 模块建设中
+                      description: 订单与结算审核列表尚未接入,敬请期待

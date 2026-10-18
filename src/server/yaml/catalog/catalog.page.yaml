@@ -1,0 +1,20 @@
+dsl: "1.0"
+page:
+  id: catalog
+  title: 目录与发布
+  name: catalog
+  description: 目录与发布模块（建设中）
+
+body:
+  type: Page
+  children:
+    - type: Breadcrumb
+      props:
+        items:
+          - label: 目录与发布
+    - type: Card
+      children:
+        - type: Empty
+          props:
+            title: 模块建设中
+            description: 目录与发布模块尚未接入,敬请期待

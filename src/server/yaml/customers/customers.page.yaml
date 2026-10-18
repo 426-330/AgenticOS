@@ -1,0 +1,20 @@
+dsl: "1.0"
+page:
+  id: customers
+  title: 客户与商业
+  name: customers
+  description: 客户与商业模块(建设中)
+
+body:
+  type: Page
+  children:
+    - type: Breadcrumb
+      props:
+        items:
+          - label: 客户与商业
+    - type: Card
+      children:
+        - type: Empty
+          props:
+            title: 模块建设中
+            description: 客户与商业模块尚未接入,敬请期待

@@ -1,0 +1,20 @@
+dsl: "1.0"
+page:
+  id: appkeys
+  title: AppKey 管理
+  name: appkeys
+  description: AppKey 管理模块(建设中)
+
+body:
+  type: Page
+  children:
+    - type: Breadcrumb
+      props:
+        items:
+          - label: AppKey 管理
+    - type: Card
+      children:
+        - type: Empty
+          props:
+            title: 模块建设中
+            description: AppKey 管理模块尚未接入,敬请期待

@@ -1,0 +1,20 @@
+dsl: "1.0"
+page:
+  id: support
+  title: 技术支持
+  name: support
+  description: 技术支持模块(建设中)
+
+body:
+  type: Page
+  children:
+    - type: Breadcrumb
+      props:
+        items:
+          - label: 技术支持
+    - type: Card
+      children:
+        - type: Empty
+          props:
+            title: 模块建设中
+            description: 技术支持模块尚未接入,敬请期待

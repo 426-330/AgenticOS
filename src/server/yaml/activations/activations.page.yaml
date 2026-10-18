@@ -1,0 +1,20 @@
+dsl: "1.0"
+page:
+  id: activations
+  title: 激活清单
+  name: activations
+  description: 激活清单模块(建设中)
+
+body:
+  type: Page
+  children:
+    - type: Breadcrumb
+      props:
+        items:
+          - label: 激活清单
+    - type: Card
+      children:
+        - type: Empty
+          props:
+            title: 模块建设中
+            description: 激活清单模块尚未接入,敬请期待

@@ -1,0 +1,20 @@
+dsl: "1.0"
+page:
+  id: products
+  title: 企业产品
+  name: products
+  description: 企业产品模块（建设中）
+
+body:
+  type: Page
+  children:
+    - type: Breadcrumb
+      props:
+        items:
+          - label: 企业产品
+    - type: Card
+      children:
+        - type: Empty
+          props:
+            title: 模块建设中
+            description: 企业产品模块尚未接入,敬请期待

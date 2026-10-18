@@ -1,0 +1,132 @@
+dsl: "1.0"
+page:
+  id: dashboard
+  title: 运营总览
+  name: dashboard
+  description: 运营总览：聚合当前能够准确统计的审核与支持待办
+dataSources:
+  todos:
+    type: http
+    autoLoad: true
+    request:
+      method: GET
+      url: /api/d/todos
+body:
+  type: Page
+  children:
+    - type: Flex
+      props:
+        align: baseline
+        gap: middle
+      children:
+        - type: Typography
+          props:
+            variant: h3
+            text: 运营总览
+        - type: Typography
+          props:
+            variant: muted
+            text: 聚合当前能够准确统计的审核与支持待办。
+    - type: Grid
+      props:
+        columns: 3
+        gap: 16
+      children:
+        - type: Card
+          props:
+            className: stat-card
+          children:
+            - type: Flex
+              props:
+                justify: space-between
+                align: start
+              children:
+                - type: Statistic
+                  props:
+                    title: 企业认证待复审
+                    value: ${data.todos.summary.certReviews}
+                - type: Icon
+                  props:
+                    name: shield
+                    size: lg
+                    className: stat-card-icon
+            - type: Typography
+              props:
+                variant: muted
+                text: 待初审、待复审
+        - type: Card
+          props:
+            className: stat-card
+          children:
+            - type: Flex
+              props:
+                justify: space-between
+                align: start
+              children:
+                - type: Statistic
+                  props:
+                    title: 待响应工单
+                    value: ${data.todos.summary.tickets}
+                - type: Icon
+                  props:
+                    name: message-circle
+                    size: lg
+                    className: stat-card-icon
+            - type: Typography
+              props:
+                variant: muted
+                text: 当前状态为 OPEN 的工单
+        - type: Card
+          props:
+            className: stat-card
+          children:
+            - type: Flex
+              props:
+                justify: space-between
+                align: start
+              children:
+                - type: Statistic
+                  props:
+                    title: 待确认银行账户
+                    value: ${data.todos.summary.bankAccounts}
+                - type: Icon
+                  props:
+                    name: credit-card
+                    size: lg
+                    className: stat-card-icon
+            - type: Typography
+              props:
+                variant: muted
+                text: 等待完成线下核验并确认
+    - type: Card
+      props:
+        title: 最新待办
+      children:
+        - type: Table
+          props:
+            dataSource: ${data.todos.items}
+            rowKey: id
+            pagination: false
+            emptyText: 暂无待办
+            columns:
+              - title: 类型
+                cell:
+                  type: Tag
+                  props:
+                    text: ${row.typeLabel}
+                    color: "${row.type == 'review' ? 'warning' : 'info'}"
+              - title: 待办事项
+                cell:
+                  type: Text
+                  props:
+                    text: ${row.title}
+              - title: 申请人
+                cell:
+                  type: Text
+                  props:
+                    text: ${row.applicant}
+              - title: 提交时间
+                cell:
+                  type: Text
+                  props:
+                    text: ${row.submittedAt}

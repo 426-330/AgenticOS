@@ -1,0 +1,211 @@
+# Sitemap 入口数据：元数据 + 布局 + 页面 + 菜单全量。
+# 本文件是会话无关的超集；可见性由 src/server/sitemap.ts 按会话裁剪：
+#   public: true   → 匿名可见（登录页）
+#   permission: x  → 需登录且具备对应权限
+#   无标记         → 需登录
+# 页面 DSL 按模块分目录存放（yaml/<模块>/<id>.yaml，页面 id = 文件名），
+# 由 sitemap.ts 递归收集建索引；lazy: true 不随 sitemap 内联下发，
+# 客户端经 /api/public/pages/{id} 懒加载。
+# updatedAt / user / permissions 为会话动态字段，由服务端在响应时注入。
+
+id: site
+resourceType: sitemap
+version: 1
+dslVersion: "1.0"
+app: { name: AgenticOS 开放平台 }
+auth: { loginPath: /login }
+
+pages:
+  - { id: login, path: /login, title: 登录, version: 1, public: true }
+  - { id: dashboard, path: /, title: 仪表盘, version: 1, lazy: true }
+  # 门户模块占位页（建设中，后续逐个接入真实页面）
+  - { id: review, path: /review, title: 审核与授权, version: 1, lazy: true }
+  - { id: customers, path: /customers, title: 客户与商业, version: 1, lazy: true }
+  - { id: appkeys, path: /appkeys, title: AppKey 管理, version: 1, lazy: true }
+  - { id: products, path: /products, title: 企业产品, version: 1, lazy: true }
+  - { id: catalog, path: /catalog, title: 目录与发布, version: 1, lazy: true }
+  - { id: activations, path: /activations, title: 激活清单, version: 1, lazy: true }
+  - { id: support, path: /support, title: 技术支持, version: 1, lazy: true }
+  - { id: settings, path: /settings, title: 系统配置, version: 1, lazy: true }
+  - { id: staff, path: /staff, title: 员工与角色, version: 1, lazy: true }
+
+menus:
+  - {
+      id: login,
+      type: page,
+      pageId: login,
+      title: 登录,
+      layout: login,
+      public: true,
+      hidden: true,
+    }
+  # 左侧菜单（平铺 10 项，按 order 排序）
+  - {
+      id: overview,
+      type: page,
+      pageId: dashboard,
+      title: 运营总览,
+      icon: chart-column,
+      layout: admin,
+      order: 1,
+    }
+  - {
+      id: review,
+      type: page,
+      pageId: review,
+      title: 审核与授权,
+      icon: shield,
+      layout: admin,
+      order: 2,
+    }
+  - {
+      id: customers,
+      type: page,
+      pageId: customers,
+      title: 客户与商业,
+      icon: building,
+      layout: admin,
+      order: 3,
+    }
+  - {
+      id: products,
+      type: page,
+      pageId: products,
+      title: 企业产品,
+      icon: package,
+      layout: admin,
+      order: 4,
+    }
+  - {
+      id: appkeys,
+      type: page,
+      pageId: appkeys,
+      title: AppKey 管理,
+      icon: key,
+      layout: admin,
+      order: 5,
+    }
+  - {
+      id: catalog,
+      type: page,
+      pageId: catalog,
+      title: 目录与发布,
+      icon: layout-grid,
+      layout: admin,
+      order: 6,
+    }
+  - {
+      id: activations,
+      type: page,
+      pageId: activations,
+      title: 激活清单,
+      icon: list,
+      layout: admin,
+      order: 7,
+    }
+  - {
+      id: support,
+      type: page,
+      pageId: support,
+      title: 技术支持,
+      icon: message-circle,
+      layout: admin,
+      order: 8,
+    }
+  - {
+      id: settings,
+      type: page,
+      pageId: settings,
+      title: 系统配置,
+      icon: settings,
+      layout: admin,
+      order: 9,
+    }
+  - {
+      id: staff,
+      type: page,
+      pageId: staff,
+      title: 员工与角色,
+      icon: users,
+      layout: admin,
+      order: 10,
+    }
+
+# 布局 DSL（PageOutlet 为页面内容出口）。
+# 布局 body 内 ${data.session.*} 由客户端注入的 session dataSource 提供
+#（user / app / menus）。登录 / 登出是普通 HTTP 调用，DSL 用内置 request
+# 动作表达（跨域绝对地址，客户端 httpHooks 自动改写进项目内代理前缀）。
+layouts:
+  # 管理端外壳：Sidebar（品牌 + SitemapMenu 导航）> Header（ThemeSwitcher
+  # 换肤 + 语言 + 用户菜单）+ Content（PageOutlet 页面出口）
+  admin:
+    dsl: "1.0"
+    body:
+      type: Layout
+      props: { className: shell-root }
+      children:
+        - type: Sidebar
+          props:
+            className: shell-main
+            brand: { title: "${data.session.app.name}", logo: /next.svg }
+            collapsible: true
+            content:
+              type: SitemapMenu
+              props:
+                items: ${data.session.menus}
+                collapsible: true
+                className: shell-menu
+              events:
+                onSelect:
+                  - action: navigate
+                    params: { to: "${event}" }
+          children:
+            - type: Header
+              props:
+                className: shell-header
+                locales:
+                  - { label: 中文, value: zh-CN }
+                  - { label: English, value: en-US }
+                user:
+                  name: ${data.session.user.name}
+                  items:
+                    - { label: 个人中心, value: profile, icon: user }
+                    - { label: 退出登录, value: logout, icon: log-out }
+              children:
+                - type: ThemeSwitcher
+              events:
+                onUserSelect:
+                  - action: if
+                    params:
+                      condition: ${event == 'logout'}
+                      then:
+                        - action: request
+                          params:
+                            method: POST
+                            url: http://localhost:9111/api/auth/logout
+                        - action: app.reload
+                          params: { to: /login }
+                      else:
+                        - action: message
+                          params:
+                            messageType: info
+                            text: 打开个人中心（演示）
+                onLocaleChange:
+                  - action: message
+                    params:
+                      messageType: info
+                      text: 语言切换为 ${event}（演示：应用层桥接后整页生效）
+            - type: Content
+              props: { className: shell-content }
+              children:
+                - type: PageOutlet
+  # 登录页外壳：纯页面出口（登录页由 Login 业务组件自带整页品牌视觉与背景装饰）
+  login:
+    dsl: "1.0"
+    body:
+      type: PageOutlet
+  # 裸布局：无外壳，页面铺满
+  blank:
+    dsl: "1.0"
+    body:
+      type: PageOutlet
